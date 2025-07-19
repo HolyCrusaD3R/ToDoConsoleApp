@@ -95,7 +95,7 @@ namespace ToDoConsoleApp
 
         public void ViewTasks()
         {
-            Console.WriteLine("\nTasks:");
+            Console.WriteLine("\n=== Task List ===");
             if (todoList.Count == 0)
             {
                 Console.WriteLine("No Tasks Available");
@@ -107,6 +107,7 @@ namespace ToDoConsoleApp
                     Console.WriteLine(task);
                 }
             }
+            Console.WriteLine("=================");
         }
 
         public void MarkTaskCompleted(int id)
