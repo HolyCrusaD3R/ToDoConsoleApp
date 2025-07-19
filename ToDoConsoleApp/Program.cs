@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 
 namespace ToDoConsoleApp
 {
@@ -84,7 +85,14 @@ namespace ToDoConsoleApp
         {
             try
             {
-                todoList.Add(new ToDoItem(description));
+                Console.WriteLine("Enter Due Date (mm/dd/yyyy, or Press Enter to Skip");
+                string dueDateInput = Console.ReadLine()?.Trim();
+                DateTime? dueDate = string.IsNullOrWhiteSpace(dueDateInput)
+                    ? null
+                    : DateTime.TryParse(dueDateInput, out DateTime parsedDate)
+                        ? parsedDate
+                        : throw new ArgumentException("Invalid Due Date Format!");
+                todoList.Add(new ToDoItem(description, dueDate));
                 Console.WriteLine("Task Added!");
             }
             catch (ArgumentException ex)
@@ -141,12 +149,13 @@ namespace ToDoConsoleApp
 
     public class ToDoItem
     {
-        public static int idCurr = 0;
+        private static int idCurr = 0;
         public string Description { get; set; }
         public bool IsCompleted { get; set; }
         public int Id { get; private set; }
+        public DateTime? DueDate { get; set; }
 
-        public ToDoItem(string description)
+        public ToDoItem(string description, DateTime? dueDate = null)
         {
             if(String.IsNullOrWhiteSpace(description))
             {
@@ -155,11 +164,13 @@ namespace ToDoConsoleApp
             Description = description;
             IsCompleted = false;
             Id = idCurr++;
+            DueDate = dueDate;
         }
 
         public override string ToString()
         {
-            return $"[{Id}] {Description} {(IsCompleted ? "Completed" : "")}";
+            string dueDateStr = DueDate.HasValue ? $" | Due: {DueDate.Value:MM/dd/yyyy}" : "";
+            return $"[{Id}] {Description}{(IsCompleted ? " (Completed)" : "")}{dueDateStr}";
         }
 
     }
