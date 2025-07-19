@@ -6,18 +6,11 @@ namespace ToDoConsoleApp
     {
         static void Main(string[] args)
         {
-            List<ToDoItem> todoList = new List<ToDoItem>();
+            ToDoListManager manager = new ToDoListManager();
 
             while(true)
             {
-                Console.WriteLine("\nToDo App Menu:");
-                Console.WriteLine("1. Add Task");
-                Console.WriteLine("2. View Tasks");
-                Console.WriteLine("3. Mark Task as Completed");
-                Console.WriteLine("4. Delete Task");
-                Console.WriteLine("5. Exit");
-                Console.WriteLine("Choose an Option: (1-5): ");
-
+                DisplayMenu();
                 string choice = Console.ReadLine();
 
                 switch(choice)
@@ -25,46 +18,18 @@ namespace ToDoConsoleApp
                     case "1":
                         Console.WriteLine("Enter Task Description");
                         string description = Console.ReadLine();
-                        try
-                        {
-                            todoList.Add(new ToDoItem(description));
-                            Console.WriteLine("Task Added!");
-                        }
-                        catch (ArgumentException ex)
-                        {
-                            Console.WriteLine($"Error: {ex.Message}");
-                        }
+                        manager.AddTask(description);
                         break;
 
                     case "2":
-                        Console.WriteLine("\nTasks:");
-                        if(todoList.Count == 0)
-                        {
-                            Console.WriteLine("No Tasks Available");
-                        }
-                        else
-                        {
-                            foreach(ToDoItem task in todoList)
-                            {
-                                Console.WriteLine(task);
-                            }
-                        }
+                        manager.ViewTasks();
                         break;
 
                     case "3":
                         Console.WriteLine("\nEnter Task ID: ");
                         if(int.TryParse(Console.ReadLine(), out int completeId))
                         {
-                            ToDoItem taskToComplete = todoList.Find(t => t.Id == completeId);
-                            if(taskToComplete != null)
-                            {
-                                taskToComplete.IsCompleted = true;
-                                Console.WriteLine("Task Marked as Complete");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Task Not Found!");
-                            }
+                            manager.MarkTaskCompleted(completeId);                        
                         }
                         else
                         {
@@ -76,17 +41,7 @@ namespace ToDoConsoleApp
                         Console.WriteLine("\nEnter Task ID: ");
                         if (int.TryParse(Console.ReadLine(), out int deleteId))
                         {
-                            ToDoItem taskToDelete = todoList.Find(t => t.Id == deleteId);
-                            if(taskToDelete != null)
-                            {
-                                todoList.Remove(taskToDelete);
-                                Console.WriteLine("Task Removed!");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Task Not Found!");
-                            }
-                        }
+                            manager.DeleteTask(deleteId);                        }
                         else
                         {
                             Console.WriteLine("Invalid ID!");
@@ -102,6 +57,83 @@ namespace ToDoConsoleApp
                         break;
                         
                 }
+            }
+        }
+        static void DisplayMenu()
+        {
+            Console.WriteLine("\nToDo App Menu:");
+            Console.WriteLine("1. Add Task");
+            Console.WriteLine("2. View Tasks");
+            Console.WriteLine("3. Mark Task as Completed");
+            Console.WriteLine("4. Delete Task");
+            Console.WriteLine("5. Exit");
+            Console.Write("Choose an Option (1-5): ");
+        }
+    }
+
+    public class ToDoListManager
+    {
+        private List<ToDoItem> todoList;
+
+        public ToDoListManager()
+        {
+            todoList = new List<ToDoItem>();
+        }
+
+        public void AddTask(string description)
+        {
+            try
+            {
+                todoList.Add(new ToDoItem(description));
+                Console.WriteLine("Task Added!");
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        public void ViewTasks()
+        {
+            Console.WriteLine("\nTasks:");
+            if (todoList.Count == 0)
+            {
+                Console.WriteLine("No Tasks Available");
+            }
+            else
+            {
+                foreach (ToDoItem task in todoList)
+                {
+                    Console.WriteLine(task);
+                }
+            }
+        }
+
+        public void MarkTaskCompleted(int id)
+        {
+            ToDoItem task = todoList.Find(t => t.Id == id);
+            if (task != null)
+            {
+                task.IsCompleted = true;
+                Console.WriteLine("Task Marked as Complete");
+            }
+            else
+            {
+                Console.WriteLine("Task Not Found!");
+            }
+        }
+
+        public void DeleteTask(int id)
+        {
+            ToDoItem task = todoList.Find(t => t.Id == id);
+            if (task != null)
+            {
+                todoList.Remove(task);
+                Console.WriteLine("Task Removed!");
+            }
+            else
+            {
+                Console.WriteLine("Task Not Found!");
             }
         }
     }
