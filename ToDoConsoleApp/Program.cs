@@ -1,5 +1,9 @@
 ﻿using Microsoft.VisualBasic;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.IO;
+
 
 namespace ToDoConsoleApp
 {
@@ -75,10 +79,12 @@ namespace ToDoConsoleApp
     public class ToDoListManager
     {
         private List<ToDoItem> todoList;
+        private const string FilePath = "tasks.json";
 
         public ToDoListManager()
         {
-            todoList = new List<ToDoItem>();
+            todoList = LoadTasks();
+            ToDoItem.SetInitialId(todoList);
         }
 
         public void AddTask(string description)
@@ -93,6 +99,7 @@ namespace ToDoConsoleApp
                         ? parsedDate
                         : throw new ArgumentException("Invalid Due Date Format!");
                 todoList.Add(new ToDoItem(description, dueDate));
+                SaveTasks();
                 Console.WriteLine("Task Added!");
             }
             catch (ArgumentException ex)
@@ -124,6 +131,7 @@ namespace ToDoConsoleApp
             if (task != null)
             {
                 task.IsCompleted = true;
+                SaveTasks();
                 Console.WriteLine("Task Marked as Complete");
             }
             else
@@ -138,6 +146,7 @@ namespace ToDoConsoleApp
             if (task != null)
             {
                 todoList.Remove(task);
+                SaveTasks();
                 Console.WriteLine("Task Removed!");
             }
             else
@@ -145,6 +154,29 @@ namespace ToDoConsoleApp
                 Console.WriteLine("Task Not Found!");
             }
         }
+
+        private void SaveTasks()
+        {
+            string json = JsonSerializer.Serialize(todoList, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(FilePath, json);
+        }
+
+        private List<ToDoItem> LoadTasks()
+        {
+            if (!File.Exists(FilePath)) return new List<ToDoItem>();
+
+            string json = File.ReadAllText(FilePath);
+            try
+            {
+                return JsonSerializer.Deserialize<List<ToDoItem>>(json) ?? new List<ToDoItem>();
+            }
+            catch
+            {
+                Console.WriteLine("Failed to load saved tasks. Starting with an empty list.");
+                return new List<ToDoItem>();
+            }
+        }
+
     }
 
     public class ToDoItem
@@ -165,6 +197,12 @@ namespace ToDoConsoleApp
             IsCompleted = false;
             Id = idCurr++;
             DueDate = dueDate;
+        }
+
+        public static void SetInitialId(List<ToDoItem> tasks)
+        {
+            if (tasks.Count == 0) idCurr = 0;
+            else idCurr = tasks[^1].Id + 1;
         }
 
         public override string ToString()
